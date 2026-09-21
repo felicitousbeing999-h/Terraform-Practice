@@ -1,15 +1,4 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "aws" {
-  region = "us-east-1" # Adjust to your target AWS region if required by your lab
-}
+# 1. DynamoDB Table
 resource "aws_dynamodb_table" "nautilus_table" {
   name         = var.KKE_TABLE_NAME
   billing_mode = "PAY_PER_REQUEST"
@@ -21,6 +10,7 @@ resource "aws_dynamodb_table" "nautilus_table" {
   }
 }
 
+# 2. IAM Role
 resource "aws_iam_role" "nautilus_role" {
   name = var.KKE_ROLE_NAME
 
@@ -38,7 +28,7 @@ resource "aws_iam_role" "nautilus_role" {
   })
 }
 
-
+# 3. IAM Read-Only Policy restricted to the specific table ARN
 resource "aws_iam_policy" "nautilus_readonly_policy" {
   name        = var.KKE_POLICY_NAME
   description = "Read-only access to ${var.KKE_TABLE_NAME}"
@@ -64,7 +54,7 @@ resource "aws_iam_policy" "nautilus_readonly_policy" {
   })
 }
 
-
+# 4. Attach Policy to Role
 resource "aws_iam_role_policy_attachment" "nautilus_role_attach" {
   role       = aws_iam_role.nautilus_role.name
   policy_arn = aws_iam_policy.nautilus_readonly_policy.arn
